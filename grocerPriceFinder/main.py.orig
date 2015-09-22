@@ -1,0 +1,71 @@
+__author__ = 'zac'
+import requests
+import bs4
+import Target
+import walmart
+import mysql.connector
+
+
+root = 'http://pyvideo.org'
+
+def baseHTML(site):
+    r = requests.get(site)
+    soup = bs4.BeautifulSoup(r.text)
+    return soup
+
+def narrowHTML(soup, peram):
+    links = soup.select(peram)
+    return links
+
+def getURLs(URL):
+    data = {}
+    r = requests.get(root + URL)
+    soup = bs4.BeautifulSoup(r.text)
+
+def compairPrice(item1, item2):
+    if item1.p < item2.p:
+        return item1
+    return item2
+
+def buildData(search):
+    database = mysql.connector.connect(user='test', password='Grisly12', database="grocer")
+    cursor = database.cursor()
+    t = Target.mkTarget(search)
+    add_food = ("INSERT INTO food "
+               "(name, price) "
+               "VALUES (%s, %s)")
+
+    add_search = ("INSERT INTO search_type "
+               "(item_id, search, points) "
+               "VALUES (%s, %s, %s)")
+    for i in t:
+
+    #    print(i.n +' '+ str(i.p))
+
+
+        food_data = (i.n, float(i.p))
+        cursor.execute(add_food,food_data)
+        foodID = cursor.lastrowid
+        search_data = (foodID, "cookie", 0)
+        cursor.execute(add_search, search_data)
+        database.commit()
+
+
+    w = walmart.mkWalmart(search)
+    for i in w:
+        food_data = (i.n, float(i.p))
+        cursor.execute(add_food,food_data)
+        foodID = cursor.lastrowid
+        search_data = (foodID, "cookie", 0)
+        cursor.execute(add_search, search_data)
+        database.commit()
+
+    cursor.close()
+    database.close
+
+
+def main():
+    buildData("fudge")
+
+
+main()
